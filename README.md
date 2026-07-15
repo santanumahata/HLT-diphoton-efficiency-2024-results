@@ -3,29 +3,53 @@
 Tag-and-probe trigger efficiency for the CMS diphoton HLT legs, 2024 data, produced the same
 way as [HLT-diphoton-efficiency-2023-results](https://github.com/santanumahata/HLT-diphoton-efficiency-2023-results).
 
+## The two variants: `etaR9rw_noPresel` vs `etaR9rw_withPresel`
+
+Both are the **same** 2024 data and the **same** trigger selection. They differ only in how the
+**eta-R9 reweighting** applied to the sample was derived:
+
+- `etaR9rw_noPresel`   -- eta-R9 reweighting derived **without** the photon preselection applied.
+- `etaR9rw_withPresel` -- eta-R9 reweighting derived **with** the photon preselection applied.
+
+The raw fitter output directories are named `HLT_2024_noPresel_SS` / `HLT_2024_withPresel_SS`;
+they are relabelled `etaR9rw_*` here so the reweighting meaning is explicit in every file name,
+plot title, and CSV `era` column.
+
 ## Scope of this repo (as pushed)
 
-- **Eras:** `noPresel_SS` and `withPresel_SS` only, exactly as named in the source tag-and-probe
-  output -- no assumption is made that either corresponds to the 2023 repo's `SS`/`fullPath_SS`
-  split.
-- **`fullPath` variant: not included.** No 2024 fullPath tag-and-probe fits exist yet anywhere on
-  the machine this was built on (searched the results directory plus every other 2024-labeled
-  workspace on disk). Will be added once those fits are produced.
+- **Variant:** the normal, track-isolation (`SS`) selection only, for **both** reweightings above.
+- **Completeness:** complete -- all 5 R9/eta categories x both legs (seeded + unseeded) fit
+  successfully for both reweightings (40 (era, leg, region, R9 bin) combinations). This includes
+  the three unseeded categories (`unseed_EB_R9gt0p85`, `unseed_EE_R9_0p90to0p93`,
+  `unseed_EE_R9gt0p93`) that failed to converge in an earlier fitter run and were re-fit.
+- **`fullPath` variant: not yet included.** Those fits are still incomplete upstream; they will
+  be added later as `etaR9rw_{noPresel,withPresel}_fullPath`.
 - **HiggsDNA `TriggerSF` JSONs: not included.** The 2023 repo's JSON step sourced its numbers from
-  an external reference CSV rather than the local fits directly, and required hand-picked R9/SCEta
-  bin-edge and fallback-mapping choices; that hasn't been redone for 2024 yet.
-- **Known gaps in the underlying fits** (not filled in or estimated -- simply absent from the data):
-  - `passingHLT_unseed_EB_R9gt0p85_2024` has no fit output in either era.
-  - No `unseed_EE_*` bins exist at all for 2024 (present in the 2023 repo).
+  an external reference CSV and required hand-picked R9/SCEta bin-edge and fallback-mapping choices;
+  that has not been redone for 2024 yet.
+
+## Categories
+
+5 R9/eta categories per leg: `EB_R9_0p50to0p55`, `EB_R9_0p55to0p85`, `EB_R9gt0p85`,
+`EE_R9_0p90to0p93`, `EE_R9gt0p93`.
 
 ## Layout
 
 - `csvs/efficiencies_from_txt.csv` -- long-format table: one row per (era, leg, region, R9 bin,
-  pt bin, fit variant). Only the `bwDscbCms` (nominal, RooCMSShape background) and `bwDscbExp`
-  (alternate, Exponential background) fit variants are populated.
-- `efficiency_plots/` -- efficiency vs probe pt, one panel per (era, leg), R9 categories overlaid.
-- `fit_plots/<era>/<leg>/<region>_<R9bin>/<bkg model>/bin*.png` -- the individual tag-and-probe
-  mass-fit plots that the efficiency numbers were extracted from.
+  pt bin, fit variant). `era` holds the `etaR9rw_*` label. Only the `bwDscbCms` (nominal,
+  RooCMSShape background) and `bwDscbExp` (alternate, Exponential background) fit variants are
+  populated; the other 6 columns are placeholders in the upstream fitter output.
+- `efficiency_plots/efficiency-data-passing_{seeded,unseeded}_2024_etaR9rw_{noPresel,withPresel}.{png,pdf}`
+  -- efficiency vs probe pt, one panel per (variant, leg), R9 categories overlaid.
+- `fit_plots/etaR9rw_{noPresel,withPresel}/{seeded,unseeded}/<region>_<R9bin>/<bkg model>/bin*.png`
+  -- the individual tag-and-probe mass-fit plots the efficiency numbers were extracted from.
+- `notebooks/2026-07-14_build_eff_csv_and_plots.ipynb` -- the executed notebook that builds the CSV
+  and efficiency plots from the raw `egammaEffi.txt` fitter outputs.
+
+## Notes
+
+- Plots carry no integrated-luminosity number: the lumi value in the fitter settings (109.08 fb-1)
+  is flagged a placeholder there, so it is not shown as a confirmed figure.
 
 ## Reproducing
 
