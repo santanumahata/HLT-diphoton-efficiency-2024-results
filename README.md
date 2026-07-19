@@ -3,27 +3,29 @@
 Tag-and-probe trigger efficiency for the CMS diphoton HLT legs, 2024 data, produced the same
 way as [HLT-diphoton-efficiency-2023-results](https://github.com/santanumahata/HLT-diphoton-efficiency-2023-results).
 
-## The two variants: `etaR9rw_noPresel` vs `etaR9rw_withPresel`
+## The four variants (two axes crossed)
 
-Both are the **same** 2024 data and the **same** trigger selection. They differ only in how the
-**eta-R9 reweighting** applied to the sample was derived:
+All are the **same** 2024 data; they differ along two independent axes:
 
-- `etaR9rw_noPresel`   -- eta-R9 reweighting derived **without** the photon preselection applied.
-- `etaR9rw_withPresel` -- eta-R9 reweighting derived **with** the photon preselection applied.
+**eta-R9 reweighting** -- how the reweighting applied to the sample was derived:
+- `noPresel`   -- derived **without** the photon preselection applied.
+- `withPresel` -- derived **with** the photon preselection applied.
 
-The raw fitter output directories are named `HLT_2024_noPresel_SS` / `HLT_2024_withPresel_SS`;
-they are relabelled `etaR9rw_*` here so the reweighting meaning is explicit in every file name,
-plot title, and CSV `era` column.
+**trigger selection:**
+- (normal) -- track-isolation `SS` selection.
+- `fullPath` -- the full HLT path requirement (`probe_passFullPath == 1`) added on top of `SS`.
+
+Crossed, these give the four labels used throughout: `etaR9rw_noPresel`, `etaR9rw_withPresel`,
+`etaR9rw_noPresel_fullPath`, `etaR9rw_withPresel_fullPath`. The raw fitter output directories
+(`HLT_2024_{noPresel,withPresel}[_fullPath]_SS`) are relabelled to these so the reweighting +
+fullPath meaning is explicit in every file name, plot title, and CSV `era` column.
 
 ## Scope of this repo (as pushed)
 
-- **Variant:** the normal, track-isolation (`SS`) selection only, for **both** reweightings above.
-- **Completeness:** complete -- all 5 R9/eta categories x both legs (seeded + unseeded) fit
-  successfully for both reweightings (40 (era, leg, region, R9 bin) combinations). This includes
+- **Completeness:** complete -- all 4 variants, all 5 R9/eta categories x both legs
+  (seeded + unseeded) fit successfully: 40 (era, leg, region, R9 bin) combinations. This includes
   the three unseeded categories (`unseed_EB_R9gt0p85`, `unseed_EE_R9_0p90to0p93`,
   `unseed_EE_R9gt0p93`) that failed to converge in an earlier fitter run and were re-fit.
-- **`fullPath` variant: not yet included.** Those fits are still incomplete upstream; they will
-  be added later as `etaR9rw_{noPresel,withPresel}_fullPath`.
 - **HiggsDNA `TriggerSF` JSONs: not included.** The 2023 repo's JSON step sourced its numbers from
   an external reference CSV and required hand-picked R9/SCEta bin-edge and fallback-mapping choices;
   that has not been redone for 2024 yet.
