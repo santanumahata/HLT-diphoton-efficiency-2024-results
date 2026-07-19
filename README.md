@@ -7,8 +7,16 @@ way as [HLT-diphoton-efficiency-2023-results](https://github.com/santanumahata/H
 
 **[▶ Open the efficiency explorer](https://santanumahata.github.io/HLT-diphoton-efficiency-2024-results/)**
 -- drag or click any curve onto one plot to overlay and compare, across **both 2023 and 2024** and
-all variants (a built-in glossary decodes every suffix). Self-contained single page; the same file
-lives in this repo as `index.html`.
+all variants (a built-in glossary decodes every suffix); hover a point to preview its tag-and-probe
+mass fit, click to open it full size. Self-contained single page; the same file lives in this repo
+as `index.html`.
+
+## Production & verification note
+
+**[`HLT_efficiency_production_2023_2024.pdf`](HLT_efficiency_production_2023_2024.pdf)** documents the
+full production end to end -- workflow, exact preselection cuts, the tag-and-probe framework usage
+(with code snippets), how the eta-R9 reweighting enters the chain, the fit model, and the exact
+nominal efficiency values for every variant / leg / category / pt bin.
 
 ## The four variants (two axes crossed)
 
