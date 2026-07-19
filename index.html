@@ -171,8 +171,9 @@ function pal(){ return isDark()?PAL_DARK:PAL_LIGHT; }
 // ---------- pretty labels ----------
 function eraLabel(c){
   if(c.year==="2024"){
-    let s = c.era.replace("etaR9rw_","").replace("_fullPath"," +fullPath");
-    return s;
+    const fp = c.era.endsWith("_fullPath");
+    const base = c.era.replace("etaR9rw_","").replace("_fullPath","");   // noPresel | withPresel
+    return base + "_in_etaR9_rw" + (fp ? " +fullPath" : "");             // e.g. noPresel_in_etaR9_rw +fullPath
   }
   return c.era.replace("HLT_2023_","").replace("_SS","").replace("_fullPath"," +fullPath").replace("Bpix","BPix");
 }
