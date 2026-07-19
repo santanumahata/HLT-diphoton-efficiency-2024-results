@@ -355,18 +355,28 @@ function showFit(best){
     fitcap.innerHTML=`<b>${shortLabel(best.c)}</b><br><span class="m">(fit image not available for this bin)</span>`;
   }
 }
-svg.addEventListener("mousemove",e=>{
+function nearest(e){                              // nearest plotted point to the cursor
   const r=svg.getBoundingClientRect(), sx=(e.clientX-r.left)/r.width*W, sy=(e.clientY-r.top)/r.height*H;
   let best=null,bd=1e9;
   for(const q of pixPts){ const d=(q.px-sx)**2+(q.py-sy)**2; if(d<bd){bd=d;best=q;} }
-  if(best && bd<260){
+  return (best && bd<300)? best : null;          // ~17px hit radius (bigger than the 4px marker)
+}
+svg.addEventListener("mousemove",e=>{
+  const best=nearest(e);
+  if(best){
     tip.style.display="block"; tip.style.left=(e.clientX+14)+"px"; tip.style.top=(e.clientY+12)+"px";
     tip.innerHTML=`<b>${shortLabel(best.c)}</b><br><span class="m">E_T ${best.p.plo.toFixed(0)}–${best.p.phi>9000?"∞":best.p.phi.toFixed(0)} GeV</span><br>`+
-      `eff = <b>${best.p.eff.toFixed(4)}</b> <span class="m">+${best.p.ehi.toFixed(4)} / −${best.p.elo.toFixed(4)}</span>`;
+      `eff = <b>${best.p.eff.toFixed(4)}</b> <span class="m">+${best.p.ehi.toFixed(4)} / −${best.p.elo.toFixed(4)}</span>`+
+      (best.p.fit?`<br><span class="m">click to open fit plot ↗</span>`:``);
     showFit(best);
-  } else tip.style.display="none";
+    svg.style.cursor = best.p.fit? "pointer":"default";
+  } else { tip.style.display="none"; svg.style.cursor="default"; }
 });
-svg.addEventListener("mouseleave",()=>tip.style.display="none");  // keep last fit image so it can be clicked
+svg.addEventListener("mouseleave",()=>{ tip.style.display="none"; svg.style.cursor="default"; }); // keep last fit image
+svg.addEventListener("click",e=>{                // click a point -> open its fit plot full size
+  const best=nearest(e);
+  if(best && best.p.fit) window.open(best.p.fit,"_blank","noopener");
+});
 
 // ---------- controls ----------
 const card=document.getElementById("card");
