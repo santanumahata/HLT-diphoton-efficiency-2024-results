@@ -3,6 +3,13 @@
 Tag-and-probe trigger efficiency for the CMS diphoton HLT legs, 2024 data, produced the same
 way as [HLT-diphoton-efficiency-2023-results](https://github.com/santanumahata/HLT-diphoton-efficiency-2023-results).
 
+## Interactive comparison tool
+
+**[▶ Open the efficiency explorer](https://santanumahata.github.io/HLT-diphoton-efficiency-2024-results/)**
+-- drag or click any curve onto one plot to overlay and compare, across **both 2023 and 2024** and
+all variants (a built-in glossary decodes every suffix). Self-contained single page; the same file
+lives in this repo as `index.html`.
+
 ## The four variants (two axes crossed)
 
 All are the **same** 2024 data; they differ along two independent axes:
