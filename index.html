@@ -201,7 +201,11 @@ function nodeEl(html, count, open){
 function chipEl(c){
   const el=document.createElement("div"); el.className="chip"; el.draggable=true; el.dataset.id=c.id;
   el.innerHTML=`<span class="sw"></span><span>${c.region} ${R9L[c.r9]}</span><span class="plus">+</span>`;
-  el.addEventListener("click",()=>addCurve(c.id));
+  el.title="click to add / remove";
+  el.addEventListener("click",()=>{                         // click toggles the curve on/off
+    if(state.added.some(a=>a.id===c.id)) removeCurve(c.id);
+    else addCurve(c.id);
+  });
   el.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",c.id); });
   return el;
 }
