@@ -133,12 +133,16 @@
           <option value="0,1.05">0 – 1.05</option>
         </select>
       </label>
+      <label>Ratio vs: <select id="refsel"></select></label>
       <span class="badge" id="count">0 curves</span>
     </div>
 
     <div class="plotcard" id="card">
       <svg id="plot" viewBox="0 0 900 540" role="img" aria-label="efficiency vs pt"></svg>
       <div class="hint" id="hint">Drag a curve here (or click it) to plot. Add several to compare.</div>
+    </div>
+    <div class="plotcard" id="ratiocard" style="padding-top:4px">
+      <svg id="ratio" viewBox="0 0 900 210" role="img" aria-label="ratio to reference curve"></svg>
     </div>
     <div class="legend" id="legend"></div>
     <div class="fitrow" id="fitrow">
@@ -157,7 +161,7 @@ const R9L = {"R9_0p50to0p55": "R9 0.50\u20130.55", "R9_0p55to0p85": "R9 0.55\u20
 const SHAPES = ["circle","square","triangle","diamond"]; // secondary encoding when >8 curves
 
 const byId = Object.fromEntries(DATA.curves.map(c=>[c.id,c]));
-const state = { added: [], fit:"bwDscbCms", hideLow:true, line:true, yMin:0.5, yMax:1.02 };
+const state = { added: [], fit:"bwDscbCms", hideLow:true, line:true, yMin:0.5, yMax:1.02, refId:null };
 const slots = new Array(8).fill(null); // colour-slot pool: index -> curve id (colour follows entity)
 
 function isDark(){ const t=document.documentElement.getAttribute("data-theme");
@@ -323,6 +327,81 @@ function render(){
   svg.innerHTML=s;
   renderLegend();
   refreshChips();
+  updateRefSel();
+  renderRatio(xlo, xhi);
+}
+
+// ---------- ratio panel (each curve / reference curve, matched per pt bin) ----------
+function niceTicks(lo, hi, n){
+  const span=(hi-lo)||1; let step=Math.pow(10, Math.floor(Math.log10(span/n)));
+  const e=(span/n)/step; if(e>5)step*=10; else if(e>2)step*=5; else if(e>1)step*=2;
+  const t=[]; for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step) t.push(+v.toFixed(6)); return t;
+}
+function updateRefSel(){
+  const sel=document.getElementById("refsel"); if(!sel) return;
+  const ids=state.added.map(a=>a.id);
+  if(!ids.includes(state.refId)) state.refId = ids[0] || null;
+  sel.innerHTML = state.added.map(a=>`<option value="${a.id}"${a.id===state.refId?" selected":""}>${shortLabel(byId[a.id])}</option>`).join("");
+  sel.disabled = state.added.length < 2;
+}
+function renderRatio(xlo, xhi){
+  const svg=document.getElementById("ratio"); if(!svg) return;
+  const P=pal(), ink=cssv("--ink"), ink2=cssv("--ink2"), grid=cssv("--grid"), axis=cssv("--axis");
+  const RW=900, RH=210, rmL=64, rmR=18, rmT=8, rmB=40, riW=RW-rmL-rmR, riH=RH-rmT-rmB;
+  const X=v=>rmL+(v-xlo)/(xhi-xlo)*riW;
+  const added=state.added;
+  if(added.length<2){
+    svg.innerHTML=`<text x="${RW/2}" y="${RH/2}" text-anchor="middle" fill="${ink2}" font-size="12">add ≥ 2 curves to see a ratio (each curve ÷ reference)</text>`;
+    return;
+  }
+  const refId = added.some(a=>a.id===state.refId)? state.refId : added[0].id;
+  const refPts={};
+  for(const p of curvePts(byId[refId])) refPts[p.plo+"_"+p.phi]={eff:p.eff, elo:p.elo, ehi:p.ehi};
+  let rmin=1, rmax=1; const series=[];
+  for(const a of added){
+    if(a.id===refId) continue;
+    const c=byId[a.id], col=P[a.slot%8], pts=[];
+    for(const p of curvePts(c)){
+      const rf=refPts[p.plo+"_"+p.phi];
+      if(!rf || rf.eff<=0 || p.eff<=0) continue;         // only where both curves have this pt bin
+      const ratio=p.eff/rf.eff;
+      const rhi=ratio*Math.sqrt((p.ehi/p.eff)**2 + (rf.elo/rf.eff)**2);   // relative errors in quadrature
+      const rlo=ratio*Math.sqrt((p.elo/p.eff)**2 + (rf.ehi/rf.eff)**2);
+      pts.push({x:p.x, ratio, rhi, rlo});
+      rmin=Math.min(rmin, ratio-rlo); rmax=Math.max(rmax, ratio+rhi);
+    }
+    if(pts.length) series.push({col, shape:a.shape, pts});
+  }
+  let ylo=Math.min(rmin,1), yhi=Math.max(rmax,1); const pad=((yhi-ylo)*0.18)||0.05; ylo-=pad; yhi+=pad;
+  const Y=v=>rmT+(1-(v-ylo)/(yhi-ylo))*riH;
+  let s="";
+  for(const v of niceTicks(ylo,yhi,4)){ const yy=Y(v);
+    s+=`<line x1="${rmL}" y1="${yy}" x2="${rmL+riW}" y2="${yy}" stroke="${grid}" stroke-width="1"/>`;
+    s+=`<text x="${rmL-8}" y="${yy+3.5}" text-anchor="end" font-size="10" fill="${ink2}">${v.toFixed(2)}</text>`;
+  }
+  const y1=Y(1.0);                                        // reference line at ratio = 1
+  s+=`<line x1="${rmL}" y1="${y1}" x2="${rmL+riW}" y2="${y1}" stroke="${axis}" stroke-width="1.2" stroke-dasharray="4 3"/>`;
+  const xstep=(xhi-xlo)>80?20:10;
+  for(let v=Math.ceil(xlo/xstep)*xstep; v<=xhi+1e-9; v+=xstep){ const xx=X(v);
+    s+=`<line x1="${xx}" y1="${rmT}" x2="${xx}" y2="${rmT+riH}" stroke="${grid}" stroke-width="1"/>`;
+    s+=`<text x="${xx}" y="${rmT+riH+15}" text-anchor="middle" font-size="10" fill="${ink2}">${v}</text>`;
+  }
+  s+=`<line x1="${rmL}" y1="${rmT+riH}" x2="${rmL+riW}" y2="${rmT+riH}" stroke="${axis}" stroke-width="1.2"/>`;
+  s+=`<line x1="${rmL}" y1="${rmT}" x2="${rmL}" y2="${rmT+riH}" stroke="${axis}" stroke-width="1.2"/>`;
+  s+=`<text x="${rmL+riW/2}" y="${RH-5}" text-anchor="middle" font-size="11" fill="${ink}">probe photon E_T [GeV]</text>`;
+  s+=`<text transform="translate(15,${rmT+riH/2}) rotate(-90)" text-anchor="middle" font-size="10.5" fill="${ink}">ratio to ref</text>`;
+  for(const se of series){
+    if(state.line && se.pts.length>1){
+      let d=""; se.pts.forEach(p=>{ const xx=X(p.x), yy=Y(p.ratio); if(xx>=rmL-1&&xx<=rmL+riW+1) d+=(d?"L":"M")+xx+","+yy+" "; });
+      if(d) s+=`<path d="${d}" fill="none" stroke="${se.col}" stroke-width="1.4" opacity="0.9"/>`;
+    }
+    for(const p of se.pts){ const xx=X(p.x); if(xx<rmL-1||xx>rmL+riW+1) continue;
+      const yy=Y(p.ratio), yhiP=Y(Math.min(yhi,p.ratio+p.rhi)), yloP=Y(Math.max(ylo,p.ratio-p.rlo));
+      s+=`<line x1="${xx}" y1="${yloP}" x2="${xx}" y2="${yhiP}" stroke="${se.col}" stroke-width="1.2" opacity="0.85"/>`;
+      s+=mkMarker(se.shape,xx,yy,3.4,se.col,cssv("--panel"));
+    }
+  }
+  svg.innerHTML=s;
 }
 function renderLegend(){
   const P=pal(), leg=document.getElementById("legend"); leg.innerHTML="";
@@ -388,6 +467,7 @@ document.getElementById("fit").addEventListener("change",e=>{state.fit=e.target.
 document.getElementById("hidelow").addEventListener("change",e=>{state.hideLow=e.target.checked;render();});
 document.getElementById("line").addEventListener("change",e=>{state.line=e.target.checked;render();});
 document.getElementById("yr").addEventListener("change",e=>{const[a,b]=e.target.value.split(",").map(Number);state.yMin=a;state.yMax=b;render();});
+document.getElementById("refsel").addEventListener("change",e=>{state.refId=e.target.value;render();});
 document.getElementById("clear").addEventListener("click",()=>{state.added=[];slots.fill(null);render();});
 document.getElementById("theme").addEventListener("click",()=>{
   const cur=document.documentElement.getAttribute("data-theme");
