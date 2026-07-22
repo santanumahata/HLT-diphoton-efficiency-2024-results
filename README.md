@@ -6,10 +6,11 @@ way as [HLT-diphoton-efficiency-2023-results](https://github.com/santanumahata/H
 ## Interactive comparison tool
 
 **[▶ Open the efficiency explorer](https://santanumahata.github.io/HLT-diphoton-efficiency-2024-results/)**
--- drag or click any curve onto one plot to overlay and compare, across **both 2023 and 2024** and
+-- drag or click any curve onto one plot to overlay and compare, across **2022, 2023 and 2024** and
 all variants (a built-in glossary decodes every suffix); hover a point to preview its tag-and-probe
-mass fit, click to open it full size. Self-contained single page; the same file lives in this repo
-as `index.html`.
+mass fit, click to open it full size. 2022 includes both this-work (bwDSCB fitter, preEE/postEE,
+standard and fullPath) and Soumya's previously-derived postEE efficiencies. Self-contained single
+page; the same file lives in this repo as `index.html`.
 
 ## Production & verification note
 
