@@ -36,6 +36,20 @@ Crossed, these give the four labels used throughout: `etaR9rw_noPresel`, `etaR9r
 (`HLT_2024_{noPresel,withPresel}[_fullPath]_SS`) are relabelled to these so the reweighting +
 fullPath meaning is explicit in every file name, plot title, and CSV `era` column.
 
+## 2024 withPresel with the normalising-flow (NF) eta-R9 map
+
+`etaR9rw_withPresel_with_NF` and `etaR9rw_withPresel_with_NF_fullPath`: same data, settings and fit as
+`etaR9rw_withPresel[_fullPath]`; only the eta-R9 weight map differs (`2024Lowmass_R9_vs_eta_ratio_presel.root`).
+Fits run 2026-10-01/02. Shown in the explorer (`index.html`) with their fit plots under
+`fit_plots/etaR9rw_withPresel_with_NF[_fullPath]/`.
+
+Comparison with 2023 postBPix and `etaR9rw_withPresel`, and a study of the two maps:
+[`etaR9_map_study/`](etaR9_map_study/) (slides: `etaR9_map_study/slides/hlt_2024_etaR9_map_comparison.pdf`).
+
+The explorer's error bars default to stat ⊕ syst: fit error ⊕ |eff(bwDSCB⊗CMS) − eff(bwDSCB⊗Exp)| per bin,
+upper error capped at 1 − eff (the `total_unc` definition of the 2023 CSV); a toggle shows fit-only errors.
+`csvs/efficiencies_from_txt.csv` is unchanged and holds fit-only errors.
+
 ## Scope of this repo (as pushed)
 
 - **Completeness:** complete -- all 4 variants, all 5 R9/eta categories x both legs
