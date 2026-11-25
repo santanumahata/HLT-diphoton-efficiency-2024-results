@@ -102,3 +102,15 @@ single-tower `probe_hoe < 0.08` (`hadTowOverEm()`) to cone-based `probe_hoe_bc <
   120 GeV) in `efficiency_plots/` and shown by default in `index.html` (`hideLow=false`), with
   total uncertainty `stat (Minos fit) ⊕ |eff_CMS − eff_Exp|` capped at `[0, 1.0]`. Other variants (`noPresel`, `fullPath`, `with_NF`) remain from the earlier
   production.
+
+## Update (2026-11-26): Full AN-24-116 preselection alignment (`opt2_20261125`)
+
+`etaR9rw_withPresel` (`csvs/efficiencies_from_txt.csv`, `efficiency_plots/`, `fit_plots/etaR9rw_withPresel/`)
+and all 30 active curves in `index.html` (2023 `preBPix`/`postBPix` standard SS + 2024 `etaR9rw_withPresel`)
+have been updated from the full `opt2_20261125` production in the latest `CMSSW_11_2_0` `egm_tnp_analysis`
+framework (`BW×DSCB + Minos`, **100% native `CMSSW_11_2_0` convergence, 0 `CMSSW_10_6_8` fallbacks**):
+
+- Cone-based H/E (`probe_hoe_bc < 0.08`), inverted pixel veto (`probe_hasPixelSeed == 1`),
+  NanoAOD-exact quadratic charged isolation (`probe_pfRelIso03_chg_quad`, `0` `-99` entries), and
+  EGamma S&S `Scale` evaluated with `probe_full5x5_r9`.
+- Max plateau `|eff_CMS − eff_Exp|` across all 10 `2024 etaR9rw_withPresel` categories drops to **`0.97%`**.
